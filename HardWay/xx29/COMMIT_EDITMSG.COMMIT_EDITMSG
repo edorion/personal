@@ -1,0 +1,30 @@
+test
+
+# --------------
+# Please enter the commit message for your changes. Everything below
+# this paragraph is ignored, and an empty message aborts the commit.
+# Just close the window to accept your message.
+diff --git a/HardWay/x15/x15.rb b/HardWay/x15/x15.rb
+index 5be6005..ca646c2 100644
+--- a/HardWay/x15/x15.rb
++++ b/HardWay/x15/x15.rb
+@@ -4,9 +4,9 @@ prompt = "> "
+ txt = File.open(filename)
+ 
+ puts "Here's your file: #{filename}"
+-puts txt.read()
++print txt.read()
+ 
+-puts "I'll also ask you to type it again:"
++puts "I'll also ask you to type the file name again:"
+ print prompt
+ file_again = STDIN.gets.chomp()
+ 
+diff --git a/HardWay/xx29/test b/HardWay/xx29/test
+new file mode 100644
+index 0000000..a8a9406
+--- /dev/null
++++ b/HardWay/xx29/test
+@@ -0,0 +1 @@
++this is a test
+\ No newline at end of file
