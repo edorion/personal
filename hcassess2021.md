@@ -70,58 +70,41 @@ $ vault write aws/roles/my-role \
 > EOF
 Success! Data written to: aws/roles/my-role
 ```
-my-other-role
+4. 
+Verify setup
 ```
-$ vault write aws/roles/my-other-role \
->     policy_arns=arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess,arn:aws:iam::aws:policy/IAMReadOnlyAccess \
->     iam_groups=group1,group2 \
->     credential_type=iam_user \
->     policy_document=-<<EOF
-> {
->     "Version": "2012-10-17",
->     "Statement": [
->         {
->             "Sid": "VisualEditor0",
->             "Effect": "Allow",
->             "Action": [
->                 "s3:ReplicateObject",
->                 "s3:PutObject",
->                 "s3:GetObjectAcl",
->                 "s3:GetObject",
->                 "s3:DeleteObjectVersion",
->                 "s3:ListBucketVersions",
->                 "s3:ListBucket",
->                 "s3:GetBucketVersioning",
->                 "s3:DeleteObject",
->                 "s3:PutObjectAcl"
->             ],
->             "Resource": [
->                 "arn:aws:s3:::sbx.ap-southeast-2.538test/*",
->                 "arn:aws:s3:::sbx.ap-southeast-2.538test"
->             ]
->         },
->         {
->             "Sid": "VisualEditor1",
->             "Effect": "Allow",
->             "Action": [
->                 "s3:GetAccountPublicAccessBlock",
->                 "s3:ListAllMyBuckets",
->                 "s3:ListJobs",
->                 "s3:CreateJob"
->             ],
->             "Resource": "*"
->         }
->     ]
-> }
-> EOF
-Success! Data written to: aws/roles/my-other-role
+$ vault read aws/creds/my-role
+Key                Value
+---                -----
+lease_id           aws/creds/my-role/bOdUeyZEZVte24Pqp6utKx7B
+lease_duration     768h
+lease_renewable    true
+access_key         AKIAVVBTO3TGPLQCTLYC
+secret_key         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
+security_token     <nil>
 ```
-
-
-
-
-1b - Translate CLI command
+###### Translate CLI command to API command
 Initial thoughts - I know (from previous experience / notes / verified here https://learn.hashicorp.com/tutorials/vault/getting-started-apis) that there is a vault command flag -output-curl-string that will output what the vault app is actually saying to the vault API
+
+```
+$ vault write -output-curl-string aws/roles/my-role credential_type=iam_user     policy_document=-<<EOF
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": "ec2:*",
+      "Resource": "*"
+    }
+  ]
+}
+EOF
+
+curl -X PUT -H "X-Vault-Request: true" -H "X-Vault-Token: $(vault print token)" -d '{"credential_type":"iam_user","policy_document":"{\n  \"Version\": \"2012-10-17\",\n  \"Statement\": [\n    {\n      \"Effect\": \"Allow\",\n      \"Action\": \"ec2:*\",\n      \"Resource\": \"*\"\n    }\n  ]\n}\n"}' http://127.0.0.1:8200/v1/aws/roles/my-role
+```
+
+
+
 
 
 
