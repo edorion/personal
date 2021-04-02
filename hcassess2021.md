@@ -13,7 +13,8 @@ Aslo, note to self, really really need to ensure my VAULT_ADDR is pointing to th
 As I don't have any interest in persisting this outside of this assessment, i'll use a dev instance
 from https://hub.docker.com/_/vault
 
-```:~/git/docker$ docker run --cap-add=IPC_LOCK -d --name=dev-vault -e 'VAULT_DEV_ROOT_TOKEN_ID=abc123' --network host vault
+```
+:~/git/docker$ docker run --cap-add=IPC_LOCK -d --name=dev-vault -e 'VAULT_DEV_ROOT_TOKEN_ID=abc123' --network host vault
 521c98af1bb49338be3ad2d792f3137a5c262bd05a58aaf5a9bc7654101f8475
 :~/git/docker$ vault login
 Token (will be hidden):
