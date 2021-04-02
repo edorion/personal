@@ -7,6 +7,7 @@
 
 ##### 1a - Setup AWS secrets Engine
 Initial plan, run up a vault instance, then add add engine to personal AWS.
+
 Aslo, note to self, really really need to ensure my VAULT_ADDR is pointing to the right instance and i'm off the VPN, don't want to touch my current employers production one
 
 ###### Get vault image for local testing
@@ -34,13 +35,87 @@ policies             ["root"]
 ```
 
 ###### Setup Secrets Engine (https://www.vaultproject.io/docs/secrets/aws)
+1.
+```
 $ vault secrets enable aws
 Success! Enabled the aws secrets engine at: aws/
+```
+2.
+Using a user I alreay have setup for AWS SDK intergration testing to my own AWS account which isnt the root user (as thats what the docs say is required) 
+```
+$ vault write aws/config/root \
+>     access_key=<some AWS IAM user access key> \
+>     secret_key=<some AWS IAM user secret ky> \
+>     region=ap-southeast-2
+Success! Data written to: aws/config/root
+```
 
-
-
-
-
+3.
+Configure a Vault role that maps to a set of permissions in AWS as well as an AWS credential type.
+my-role
+```
+$ vault write aws/roles/my-role \
+>     credential_type=iam_user \
+>     policy_document=-<<EOF
+> {
+>   "Version": "2012-10-17",
+>   "Statement": [
+>     {
+>       "Effect": "Allow",
+>       "Action": "ec2:*",
+>       "Resource": "*"
+>     }
+>   ]
+> }
+> EOF
+Success! Data written to: aws/roles/my-role
+```
+my-other-role
+```
+$ vault write aws/roles/my-other-role \
+>     policy_arns=arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess,arn:aws:iam::aws:policy/IAMReadOnlyAccess \
+>     iam_groups=group1,group2 \
+>     credential_type=iam_user \
+>     policy_document=-<<EOF
+> {
+>     "Version": "2012-10-17",
+>     "Statement": [
+>         {
+>             "Sid": "VisualEditor0",
+>             "Effect": "Allow",
+>             "Action": [
+>                 "s3:ReplicateObject",
+>                 "s3:PutObject",
+>                 "s3:GetObjectAcl",
+>                 "s3:GetObject",
+>                 "s3:DeleteObjectVersion",
+>                 "s3:ListBucketVersions",
+>                 "s3:ListBucket",
+>                 "s3:GetBucketVersioning",
+>                 "s3:DeleteObject",
+>                 "s3:PutObjectAcl"
+>             ],
+>             "Resource": [
+>                 "arn:aws:s3:::sbx.ap-southeast-2.538test/*",
+>                 "arn:aws:s3:::sbx.ap-southeast-2.538test"
+>             ]
+>         },
+>         {
+>             "Sid": "VisualEditor1",
+>             "Effect": "Allow",
+>             "Action": [
+>                 "s3:GetAccountPublicAccessBlock",
+>                 "s3:ListAllMyBuckets",
+>                 "s3:ListJobs",
+>                 "s3:CreateJob"
+>             ],
+>             "Resource": "*"
+>         }
+>     ]
+> }
+> EOF
+Success! Data written to: aws/roles/my-other-role
+```
 
 
 
